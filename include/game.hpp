@@ -6,23 +6,23 @@
 #include <SDL2/SDL.h>
 
 typedef struct Vector2 {
-	float x;
-	float y;
+        float x;
+        float y;
 } Vector2;
 
 class Game {
       private:
         SDL_Window* mWindow;
-	SDL_Renderer* mRenderer;
-	int mWidth;
-	int mHeight;
-	Vector2 mBall;
-	Vector2 mBallVelocity;
-	Vector2 mPaddle;
-	int mPaddleDir;
+        SDL_Renderer* mRenderer;
+        int mWidth;
+        int mHeight;
+        Vector2 mBall;
+        Vector2 mBallVelocity;
+        Vector2 mPaddle;
+        int mPaddleDir;
         bool mRunning;
-	Uint32 mTicksCount;
-	
+        Uint32 mTicksCount;
+        bool mMousePressed;
 
         void input();
         void update();

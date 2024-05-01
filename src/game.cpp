@@ -1,4 +1,6 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_mouse.h>
 #include <cstdio>
 
 #include "game.hpp"
@@ -9,24 +11,41 @@
 Game::Game()
     : mWindow(nullptr), mWidth(1024), mHeight(768), mBall({(float)mWidth / 2, (float)mHeight / 2}),
       mBallVelocity({-200.0f, 235.0f}), mPaddle({50, (float)mHeight / 2 - 20}), mPaddleDir(0),
-      mRunning(true), mTicksCount(0) {}
+      mRunning(true), mTicksCount(0), mMousePressed(false) {}
 
 void Game::input() {
         SDL_Event event;
 
         while (SDL_PollEvent(&event)) {
                 switch (event.type) {
-                case SDL_QUIT:
+                case SDL_QUIT: {
                         // Quitting the app
                         mRunning = false;
                         return;
-                case SDL_WINDOWEVENT:
+                }
+
+                case SDL_WINDOWEVENT: {
                         if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                                 // Window was resized
                                 mWidth = event.window.data1;
                                 mHeight = event.window.data2;
                         }
                         break;
+                }
+
+                case SDL_MOUSEBUTTONDOWN: {
+                        mMousePressed = true;
+                        break;
+                }
+
+                case SDL_MOUSEBUTTONUP: {
+                        mMousePressed = false;
+                        break;
+                }
+
+                default: {
+                        // Don't handle, wo don't need this event
+                }
                 }
         }
 
@@ -44,10 +63,28 @@ void Game::input() {
                 // Pressed down
                 mPaddleDir = 1;
         }
+
+	if (mMousePressed) {
+		// Mouse pressed, move there!
+		int mouseY;
+		SDL_GetMouseState(&mouseY, NULL);
+
+		// Calculate difference
+		int diff = mouseY - mPaddle.y;
+		// Normalize
+		if (diff < 0) diff = -diff;
+
+		// Only process when the difference if big
+		if (diff > 10) {
+
+		}
+		
+		// Check if mouse below or above paddle
+	}
 }
 
 void Game::update() {
-        // Wait for ticks
+        // Wait for 16 ticks to pass
         while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16))
                 ;
         float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
@@ -60,6 +97,8 @@ void Game::update() {
         // Update ticks count
         mTicksCount = SDL_GetTicks();
 
+
+	// Update Movements
         if (mPaddleDir != 0) {
                 mPaddle.y += mPaddleDir * 300.0f * deltaTime;
         }

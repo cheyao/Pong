@@ -2,17 +2,23 @@
 
 #include "game.hpp"
 
+#if defined(__CYGWIN__) || defined(ANDROID)
+#include <SDL2/SDL_main.h>
+int SDL_main() {
+#else
 int main() {
-	Game* game = new Game();
+#endif
+        Game* game = new Game();
 
-	if (game->initialize()) {
-		// Failed to init
-		return 1;
-	}
+        if (game->initialize()) {
+                // Failed to init
+                return 1;
+        }
 
-	game->loop();
+        game->loop();
 
-	game->close();
+        game->close();
 
-	return 0;
+        return 0;
 }
+
