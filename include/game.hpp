@@ -29,8 +29,8 @@ class Game {
 	int mPaddleBDir;
 	Uint32 mTicksCount;
 #ifdef __ANDROID__
-	int mLeftPressID;
-	int mRightPressID;
+	Uint64 mLeftPressID;
+	Uint64 mRightPressID;
 	Vector2 mFingerL;
 	Vector2 mFingerR;
 #endif
@@ -38,8 +38,10 @@ class Game {
 	float THICKNESS;
 	float PADDLE_HEIGHT;
 
+	int input();
 	int update();
 	int draw();
+
 	int updateBall(Ball& ball, float delta);
 
        public:

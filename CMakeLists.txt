@@ -78,11 +78,12 @@ endif()
 # Don't need for Android
 if (ANDROID)
 	message("Building for Android")
+
 	add_library(${BUILD_NAME} SHARED)
 
 	target_sources(${BUILD_NAME} PRIVATE ${SRC})
 
-	target_link_libraries(${BUILD_NAME} SDL3)
+	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3)
 elseif(MACOSX)
 	message("Building for MacOS")
 	include_directories(${SDL3_INCLUDE_DIRS})

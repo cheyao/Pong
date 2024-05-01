@@ -5,8 +5,6 @@
 #include <cstdio>
 #include <vector>
 
-#include "SDL_events.h"
-
 Game::Game()
     : mWindow(nullptr),
       mWidth(1024),
@@ -17,58 +15,7 @@ Game::Game()
       THICKNESS(15),
       PADDLE_HEIGHT(100) {}
 
-int Game::handleEvent(SDL_Event event) {
-	switch (event.type) {
-		case SDL_EVENT_QUIT:
-			// Quitting the app
-			return 1;
-
-		case SDL_EVENT_WINDOW_RESIZED:
-			// Window was resized
-			mWidth = event.window.data1;
-			mHeight = event.window.data2;
-			mPaddleB.x = mWidth - 75;
-			break;
-
-#ifdef __ANDROID__
-		case SDL_FINGERDOWN:
-			if (event.tfinger.x * mWidth < mWidth / 2) {
-				mLeftPressID = event.tfinger.fingerId;
-			} else {
-				mRightPressID = event.tfinger.fingerId;
-			}
-			// Handle the rest of press with motion
-		case SDL_FINGERMOTION:
-			// X and Y are from 0 to 1!?!?
-			if (mLeftPressID == event.tfinger.fingerId) {
-				mFingerL.x = event.tfinger.x * mWidth;
-				mFingerL.y = event.tfinger.y * mHeight;
-			} else if (mRightPressID == event.tfinger.fingerId) {
-				mFingerR.x = event.tfinger.x * mWidth;
-				mFingerR.y = event.tfinger.y * mHeight;
-			}
-			break;
-
-		case SDL_FINGERUP:
-			if (event.tfinger.fingerId == mLeftPressID) {
-				mLeftPressID = -1;  // No press
-				mPaddleADir = 0;
-				mFingerL.x = -1;
-				mFingerL.y = -1;
-			} else if (event.tfinger.fingerId == mRightPressID) {
-				mRightPressID = -1;
-				mPaddleBDir = 0;
-				mFingerR.x = -1;
-				mFingerR.y = -1;
-			}
-			break;
-#endif
-
-		default:
-			// Don't handle, we don't need this event
-			break;
-	}
-
+int Game::input() {
 #ifdef __ANDROID__
 	if (mFingerL.x != -1) {
 		if (mFingerL.y < mPaddleA.y + 25) {  // higher than paddle
@@ -118,6 +65,61 @@ int Game::handleEvent(SDL_Event event) {
 	}
 #endif
 	return 0;
+}
+
+int Game::handleEvent(SDL_Event event) {
+	switch (event.type) {
+		case SDL_EVENT_QUIT:
+			// Quitting the app
+			return 1;
+
+		case SDL_EVENT_WINDOW_RESIZED:
+			// Window was resized
+			mWidth = event.window.data1;
+			mHeight = event.window.data2;
+			mPaddleB.x = mWidth - 75;
+			break;
+
+#ifdef __ANDROID__
+		case SDL_EVENT_FINGER_DOWN:
+			if (event.tfinger.x * mWidth < mWidth / 2) {
+				mLeftPressID = event.tfinger.fingerID;
+			} else {
+				mRightPressID = event.tfinger.fingerID;
+			}
+			// Handle the rest of press with motion
+		case SDL_EVENT_FINGER_MOTION:
+			// X and Y are from 0 to 1!?!?
+			if (mLeftPressID == event.tfinger.fingerID) {
+				mFingerL.x = event.tfinger.x * mWidth;
+				mFingerL.y = event.tfinger.y * mHeight;
+			} else if (mRightPressID == event.tfinger.fingerID) {
+				mFingerR.x = event.tfinger.x * mWidth;
+				mFingerR.y = event.tfinger.y * mHeight;
+			}
+			break;
+
+		case SDL_EVENT_FINGER_UP:
+			if (event.tfinger.fingerID == mLeftPressID) {
+				mLeftPressID = -1;  // No press
+				mPaddleADir = 0;
+				mFingerL.x = -1;
+				mFingerL.y = -1;
+			} else if (event.tfinger.fingerID == mRightPressID) {
+				mRightPressID = -1;
+				mPaddleBDir = 0;
+				mFingerR.x = -1;
+				mFingerR.y = -1;
+			}
+			break;
+#endif
+
+		default:
+			// Don't handle, we don't need this event
+			break;
+	}
+
+	return input();
 }
 
 int Game::update() {
@@ -241,6 +243,9 @@ int Game::draw() {
 }
 
 int Game::loop() {
+	int iReturn = input();
+	if (iReturn != 0) return iReturn;
+
 	int uReturn = update();
 	if (uReturn != 0) return uReturn;
 
