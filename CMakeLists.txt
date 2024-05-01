@@ -6,16 +6,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Check platform
-if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
-	set(ANDROID TRUE)
-	set(BUILD_NAME main)
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        set(MACOSX TRUE)
-	set(BUILD_NAME Pong)
-else()
-	set(BUILD_NAME Pong)
-endif()
+# Options:
+option(SANITIZE "Build with sanitizer support if available" OFF)
+option(VENDOR "Vendor libraries" OFF)
+# CMAKE_BUILD_TYPE Release Debug
 
 # Set buildname to main
 set(SRC
@@ -42,9 +36,19 @@ else()
 	add_definitions(-DNDEBUG)
 endif()
 
-# Options:
-option(SANITIZE "Build with sanitizer support if available" OFF)
-# CMAKE_BUILD_TYPE Release Debug
+# Check platform
+if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
+	set(ANDROID TRUE)
+	set(BUILD_NAME main)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        set(MACOSX TRUE)
+	set(BUILD_NAME Pong)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	set(WINDOWS TRUE)
+	set(BUILD_NAME Pong)
+else()
+	set(BUILD_NAME Pong)
+endif()
 
 # Sanitize
 if(SANITIZE STREQUAL ON)
@@ -62,6 +66,14 @@ check_ipo_supported(RESULT LTOSupported OUTPUT error)
 
 include_directories(include)
 
+if(NOT ANDROID)
+	if(VENDOR)
+    		add_subdirectory(external/SDL3 EXCLUDE_FROM_ALL)
+	else()
+    		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
+	endif()
+endif()
+
 # Find and include SDL2
 # Don't need for Android
 if (ANDROID)
@@ -70,11 +82,10 @@ if (ANDROID)
 
 	target_sources(${BUILD_NAME} PRIVATE ${SRC})
 
-	target_link_libraries(main SDL2 SDL2main)
+	target_link_libraries(${BUILD_NAME} SDL3)
 elseif(MACOSX)
 	message("Building for MacOS")
-	find_package(SDL2 REQUIRED)
-	include_directories(${SDL2_INCLUDE_DIRS})
+	include_directories(${SDL3_INCLUDE_DIRS})
 	add_executable(${BUILD_NAME} MACOSX_BUNDLE ${SRC})            
 	set_target_properties(${BUILD_NAME} PROPERTIES
 	    BUNDLE True
@@ -85,16 +96,19 @@ elseif(MACOSX)
 	    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
 	    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/info.plist.in
 	)
-	target_link_libraries(${BUILD_NAME} ${SDL2_LIBRARIES})
+target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
+elseif(WINDOWS)
+	message("Building for windows")
+	add_executable(${BUILD_NAME} WIN32 ${SRC})
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
 else()
-	message("Building for Else")
-	find_package(SDL2 REQUIRED)
+	message("Building for linux (probably)")
 
-	include_directories(${SDL2_INCLUDE_DIRS})
+	include_directories(${SDL3_INCLUDE_DIRS})
 
 	add_executable(${BUILD_NAME} ${SRC})
 
-	target_link_libraries(${BUILD_NAME} ${SDL2_LIBRARIES})
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
 endif()
 
 

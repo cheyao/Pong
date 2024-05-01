@@ -1,10 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
-#include <SDL2/SDL_video.h>
-#include <vector>
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <vector>
 
 typedef struct Vector2 {
         float x;
@@ -36,8 +35,8 @@ class Game {
         Vector2 mFingerR;
 #endif
 
-        int THICKNESS;
-        int PADDLE_HEIGHT;
+        float THICKNESS;
+        float PADDLE_HEIGHT;
 
         void input();
         void update();
