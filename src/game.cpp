@@ -1,14 +1,12 @@
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_mouse.h>
 #include <cstdio>
+#include <cstdlib>
 
 #include "game.hpp"
 
 Game::Game()
-    : mWindow(nullptr), mWidth(1024), mHeight(768), mBallVelocity({-200.0f, 235.0f}),
-      mPaddleADir(0), mPaddleBDir(0), mRunning(true), mTicksCount(0), THICKNESS(15),
-      PADDLE_HEIGHT(100) {}
+    : mWindow(nullptr), mWidth(1024), mHeight(768), mPaddleADir(0), mPaddleBDir(0), mRunning(true),
+      mTicksCount(0), THICKNESS(15), PADDLE_HEIGHT(100) {}
 
 void Game::input() {
         SDL_Event event;
@@ -76,18 +74,18 @@ void Game::input() {
                 } else if (mFingerL.y > mPaddleA.y + PADDLE_HEIGHT - 25) { // lower
                         mPaddleADir = 1;
                 } else {
-			mPaddleADir = 0;
-		}
+                        mPaddleADir = 0;
+                }
         }
 
         if (mFingerR.x != -1) {
                 if (mFingerR.y < mPaddleB.y + 25) { // higher then paddle
                         mPaddleBDir = -1;
-                } else if (mFingerR.y > mPaddleB.y + PADDLE_HEIGHT -25) { // lower
+                } else if (mFingerR.y > mPaddleB.y + PADDLE_HEIGHT - 25) { // lower
                         mPaddleBDir = 1;
                 } else {
-			mPaddleBDir = 0;
-		}
+                        mPaddleBDir = 0;
+                }
         }
 #else
         // Process keyboard
@@ -121,11 +119,11 @@ void Game::update() {
         // Wait for 16 ticks to pass
         while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16))
                 ;
-        float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
+        float delta = (SDL_GetTicks() - mTicksCount) / 1000.0f;
 
         // Max delta time
-        if (deltaTime > 0.05f) {
-                deltaTime = 0.05f;
+        if (delta > 0.05f) {
+                delta = 0.05f;
         }
 
         // Update ticks count
@@ -133,10 +131,15 @@ void Game::update() {
 
         // Update Movements
         if (mPaddleADir != 0) {
-                mPaddleA.y += mPaddleADir * 300.0f * deltaTime;
+                mPaddleA.y += mPaddleADir * 300.0f * delta;
         }
         if (mPaddleBDir != 0) {
-                mPaddleB.y += mPaddleBDir * 300.0f * deltaTime;
+                mPaddleB.y += mPaddleBDir * 300.0f * delta;
+        }
+
+        // Update balls
+        for (Ball& b : mBalls) {
+                updateBall(b, delta);
         }
 
         // Make sure paddle doesn't move off screen
@@ -150,39 +153,41 @@ void Game::update() {
         } else if (mPaddleB.y > (mHeight - PADDLE_HEIGHT / 2.0f - THICKNESS)) {
                 mPaddleB.y = mHeight - PADDLE_HEIGHT / 2.0f - THICKNESS;
         }
+}
 
+void Game::updateBall(Ball& ball, float delta) {
         // Update ball
-        mBall.x += mBallVelocity.x * deltaTime;
-        mBall.y += mBallVelocity.y * deltaTime;
+        ball.position.x += ball.velocity.x * delta;
+        ball.position.y += ball.velocity.y * delta;
 
         // Check if ball hit paddleA
-        float diffA = mPaddleA.y - mBall.y;
+        float diffA = mPaddleA.y - ball.position.y;
         diffA = (diffA > 0.0f) ? diffA : -diffA;
 
-        if (diffA <= PADDLE_HEIGHT / 2.0f && mBall.x <= 70.0f && mBall.x >= 65.0f &&
-            mBallVelocity.x < 0.0f) {
-                mBallVelocity.x *= -1.0f;
+        if (diffA <= PADDLE_HEIGHT / 2.0f && ball.position.x <= 70.0f && ball.position.x >= 65.0f &&
+            ball.velocity.x < 0.0f) {
+                ball.velocity.x *= -1.0f;
         }
 
         // Check if ball hit paddleB
-        float diffB = mPaddleB.y - mBall.y;
+        float diffB = mPaddleB.y - ball.position.y;
         diffB = (diffB > 0.0f) ? diffB : -diffB;
 
-        if (diffB <= PADDLE_HEIGHT / 2.0f && mBall.x >= mWidth - 80.0f &&
-            mBall.x <= mWidth - 75.0f && mBallVelocity.x > 0.0f) {
-                mBallVelocity.x *= -1.0f;
+        if (diffB <= PADDLE_HEIGHT / 2.0f && ball.position.x >= mWidth - 80.0f &&
+            ball.position.x <= mWidth - 75.0f && ball.velocity.x > 0.0f) {
+                ball.velocity.x *= -1.0f;
         }
 
         // Check if ball hit top or bottom wall
-        if (mBall.y <= 15 && mBallVelocity.y < 0.0f) { // Top
-                mBallVelocity.y *= -1;
-        } else if (mBall.y >= (mHeight - 15) && mBallVelocity.y > 0.0f) { // Bottom
-                mBallVelocity.y *= -1;
+        if (ball.position.y <= 15 && ball.velocity.y < 0.0f) { // Top
+                ball.velocity.y *= -1;
+        } else if (ball.position.y >= (mHeight - 15) && ball.velocity.y > 0.0f) { // Bottom
+                ball.velocity.y *= -1;
         }
 
         // Check if off screen
-        if ((mBall.x < 0 && mBallVelocity.x < 0.0f) ||      // Left Wall
-            (mBall.x > mWidth && mBallVelocity.x > 0.0f)) { // Right wall
+        if ((ball.position.x < 0 && ball.velocity.x < 0.0f) ||      // Left Wall
+            (ball.position.x > mWidth && ball.velocity.x > 0.0f)) { // Right wall
                 mRunning = false;
         }
 }
@@ -213,9 +218,12 @@ void Game::draw() {
         SDL_RenderFillRect(mRenderer, &paddle);
 
         // Draw ball
-        SDL_Rect ball{static_cast<int>(mBall.x - THICKNESS / 2.0f),
-                      static_cast<int>(mBall.y - THICKNESS / 2.0f), THICKNESS, THICKNESS};
-        SDL_RenderFillRect(mRenderer, &ball);
+        for (Ball b : mBalls) {
+                SDL_Rect ball{static_cast<int>(b.position.x - THICKNESS / 2.0f),
+                              static_cast<int>(b.position.y - THICKNESS / 2.0f), THICKNESS,
+                              THICKNESS};
+                SDL_RenderFillRect(mRenderer, &ball);
+        }
 
         // Swap front buffer and back buffer
         SDL_RenderPresent(mRenderer);
@@ -244,7 +252,6 @@ bool Game::initialize() {
 
         // Reset bonds, mostly for Android
         SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
-        mBall = {(float)mWidth / 2, (float)mHeight / 2};
         mPaddleA = {50, (float)mHeight / 2 - (float)PADDLE_HEIGHT / 2};
         mPaddleB = {(float)mWidth - 75, (float)mHeight / 2 - (float)PADDLE_HEIGHT / 2};
 
@@ -259,6 +266,13 @@ bool Game::initialize() {
 #endif
 
         return 0; // Succesfully initialized!
+}
+
+void Game::setBallCount(int count) {
+        for (int i = 0; i < count; i++) {
+                mBalls.push_back({{(float)mWidth / 2, (float)mHeight / 2},
+                                  {static_cast<float>(rand() % 100) - 50, static_cast<float>(rand() % mHeight - 800) + 400}});
+        }
 }
 
 void Game::close() {

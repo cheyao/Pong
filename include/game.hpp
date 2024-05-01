@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 #include <SDL2/SDL_video.h>
+#include <vector>
 #pragma once
 
 #include <SDL2/SDL.h>
@@ -10,14 +11,18 @@ typedef struct Vector2 {
         float y;
 } Vector2;
 
+typedef struct Ball {
+        Vector2 position;
+        Vector2 velocity;
+} Ball;
+
 class Game {
       private:
         SDL_Window* mWindow;
         SDL_Renderer* mRenderer;
         int mWidth;
         int mHeight;
-        Vector2 mBall;
-        Vector2 mBallVelocity;
+        std::vector<Ball> mBalls;
         Vector2 mPaddleA;
         int mPaddleADir;
         Vector2 mPaddleB;
@@ -25,10 +30,10 @@ class Game {
         bool mRunning;
         Uint32 mTicksCount;
 #ifdef __ANDROID__
-	int mLeftPressID;
-	int mRightPressID;
-	Vector2 mFingerL;
-	Vector2 mFingerR;
+        int mLeftPressID;
+        int mRightPressID;
+        Vector2 mFingerL;
+        Vector2 mFingerR;
 #endif
 
         int THICKNESS;
@@ -37,10 +42,12 @@ class Game {
         void input();
         void update();
         void draw();
+        void updateBall(Ball& ball, float delta);
 
       public:
         Game();
         bool initialize();
+        void setBallCount(int count);
         void loop();
         void close();
 };
