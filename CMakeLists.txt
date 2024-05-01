@@ -18,7 +18,6 @@ else()
 endif()
 
 # Set buildname to main
-
 set(SRC
 src/main.cpp
 src/game.cpp

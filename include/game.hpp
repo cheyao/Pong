@@ -18,14 +18,21 @@ class Game {
         int mHeight;
         Vector2 mBall;
         Vector2 mBallVelocity;
-        Vector2 mPaddle;
-        int mPaddleDir;
+        Vector2 mPaddleA;
+        int mPaddleADir;
+        Vector2 mPaddleB;
+        int mPaddleBDir;
         bool mRunning;
         Uint32 mTicksCount;
-        bool mMousePressed;
+#ifdef __ANDROID__
+	int mLeftPressID;
+	int mRightPressID;
+	Vector2 mFingerL;
+	Vector2 mFingerR;
+#endif
 
-	int THICKNESS;
-	int PADDLE_HEIGHT;
+        int THICKNESS;
+        int PADDLE_HEIGHT;
 
         void input();
         void update();

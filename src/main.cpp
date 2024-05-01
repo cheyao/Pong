@@ -1,16 +1,13 @@
 #include <SDL2/SDL.h>
 
 #include "game.hpp"
-/*
-#if defined(__CYGWIN__) || defined(ANDROID)
-#include <SDL2/SDL_main.h>
-int SDL_main() {
-#else
-*/
+
 int main(int argv, char** args) {
-	/*
-#endif
-*/
+	// Android needs argc and argv, but we don't use them, so...
+	(void)argv;
+	(void)args;
+
+	// Start our game!
         Game* game = new Game();
 
         if (game->initialize()) {
@@ -21,9 +18,6 @@ int main(int argv, char** args) {
         game->loop();
 
         game->close();
-
-	(void)argv;
-	(void)args;
 
         return 0;
 }
