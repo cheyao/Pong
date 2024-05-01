@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/macos,windows,linux,android,androidstudio,vim,c++,c
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,linux,android,androidstudio,vim,c++,c
+# Created by https://www.toptal.com/developers/gitignore/api/c,c++,vim,linux,macos,android,windows,androidstudio,cmake,ninja
+# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,vim,linux,macos,android,windows,androidstudio,cmake,ninja
 
 ### Android ###
 # Gradle files
@@ -115,6 +115,23 @@ dkms.conf
 
 # Executables
 
+### CMake ###
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+### CMake Patch ###
+# External projects
+*-prefix/
+
 ### Linux ###
 *~
 
@@ -162,6 +179,10 @@ Temporary Items
 ### macOS Patch ###
 # iCloud generated files
 *.icloud
+
+### Ninja ###
+.ninja_deps
+.ninja_log
 
 ### Vim ###
 # Swap
@@ -330,5 +351,5 @@ fabric.properties
 
 !/gradle/wrapper/gradle-wrapper.jar
 
-# End of https://www.toptal.com/developers/gitignore/api/macos,windows,linux,android,androidstudio,vim,c++,c
+# End of https://www.toptal.com/developers/gitignore/api/c,c++,vim,linux,macos,android,windows,androidstudio,cmake,ninja
 

@@ -13,68 +13,60 @@ Game::Game()
       mHeight(768),
       mPaddleADir(0),
       mPaddleBDir(0),
-      mRunning(true),
       mTicksCount(0),
       THICKNESS(15),
       PADDLE_HEIGHT(100) {}
 
-void Game::input() {
-	SDL_Event event;
+int Game::handleEvent(SDL_Event event) {
+	switch (event.type) {
+		case SDL_EVENT_QUIT:
+			// Quitting the app
+			return 1;
 
-	while (SDL_PollEvent(&event)) {
-		switch (event.type) {
-			case SDL_EVENT_QUIT:
-				// Quitting the app
-				mRunning = false;
-				return;
-
-			case SDL_EVENT_WINDOW_RESIZED:
-				// Window was resized
-				mWidth = event.window.data1;
-				mHeight = event.window.data2;
-				mPaddleB.x = mWidth - 75;
-				break;
+		case SDL_EVENT_WINDOW_RESIZED:
+			// Window was resized
+			mWidth = event.window.data1;
+			mHeight = event.window.data2;
+			mPaddleB.x = mWidth - 75;
+			break;
 
 #ifdef __ANDROID__
-			case SDL_FINGERDOWN:
-				if (event.tfinger.x * mWidth < mWidth / 2) {
-					mLeftPressID = event.tfinger.fingerId;
-				} else {
-					mRightPressID = event.tfinger.fingerId;
-				}
-				// Handle the rest of press with motion
-			case SDL_FINGERMOTION:
-				// X and Y are from 0 to 1!?!?
-				if (mLeftPressID == event.tfinger.fingerId) {
-					mFingerL.x = event.tfinger.x * mWidth;
-					mFingerL.y = event.tfinger.y * mHeight;
-				} else if (mRightPressID ==
-					   event.tfinger.fingerId) {
-					mFingerR.x = event.tfinger.x * mWidth;
-					mFingerR.y = event.tfinger.y * mHeight;
-				}
-				break;
+		case SDL_FINGERDOWN:
+			if (event.tfinger.x * mWidth < mWidth / 2) {
+				mLeftPressID = event.tfinger.fingerId;
+			} else {
+				mRightPressID = event.tfinger.fingerId;
+			}
+			// Handle the rest of press with motion
+		case SDL_FINGERMOTION:
+			// X and Y are from 0 to 1!?!?
+			if (mLeftPressID == event.tfinger.fingerId) {
+				mFingerL.x = event.tfinger.x * mWidth;
+				mFingerL.y = event.tfinger.y * mHeight;
+			} else if (mRightPressID == event.tfinger.fingerId) {
+				mFingerR.x = event.tfinger.x * mWidth;
+				mFingerR.y = event.tfinger.y * mHeight;
+			}
+			break;
 
-			case SDL_FINGERUP:
-				if (event.tfinger.fingerId == mLeftPressID) {
-					mLeftPressID = -1;  // No press
-					mPaddleADir = 0;
-					mFingerL.x = -1;
-					mFingerL.y = -1;
-				} else if (event.tfinger.fingerId ==
-					   mRightPressID) {
-					mRightPressID = -1;
-					mPaddleBDir = 0;
-					mFingerR.x = -1;
-					mFingerR.y = -1;
-				}
-				break;
+		case SDL_FINGERUP:
+			if (event.tfinger.fingerId == mLeftPressID) {
+				mLeftPressID = -1;  // No press
+				mPaddleADir = 0;
+				mFingerL.x = -1;
+				mFingerL.y = -1;
+			} else if (event.tfinger.fingerId == mRightPressID) {
+				mRightPressID = -1;
+				mPaddleBDir = 0;
+				mFingerR.x = -1;
+				mFingerR.y = -1;
+			}
+			break;
 #endif
 
-			default:
-				// Don't handle, we don't need this event
-				break;
-		}
+		default:
+			// Don't handle, we don't need this event
+			break;
 	}
 
 #ifdef __ANDROID__
@@ -125,12 +117,10 @@ void Game::input() {
 		mPaddleBDir = 1;
 	}
 #endif
+	return 0;
 }
 
-void Game::update() {
-	// Wait for 16 ticks to pass
-	while (SDL_GetTicks() < mTicksCount + 16)
-		;
+int Game::update() {
 	float delta = (SDL_GetTicks() - mTicksCount) / 1000.0f;
 
 	// Max delta time
@@ -151,7 +141,8 @@ void Game::update() {
 
 	// Update balls
 	for (Ball& b : mBalls) {
-		updateBall(b, delta);
+		int uReturn = updateBall(b, delta);
+		if (uReturn != 0) return uReturn;
 	}
 
 	// Make sure paddle doesn't move off screen
@@ -165,9 +156,11 @@ void Game::update() {
 	} else if (mPaddleB.y > (mHeight - PADDLE_HEIGHT / 2.0f - THICKNESS)) {
 		mPaddleB.y = mHeight - PADDLE_HEIGHT / 2.0f - THICKNESS;
 	}
+
+	return 0;
 }
 
-void Game::updateBall(Ball& ball, float delta) {
+int Game::updateBall(Ball& ball, float delta) {
 	// Update ball
 	ball.position.x += ball.velocity.x * delta;
 	ball.position.y += ball.velocity.y * delta;
@@ -203,11 +196,13 @@ void Game::updateBall(Ball& ball, float delta) {
 	if ((ball.position.x < 0 && ball.velocity.x < 0.0f) ||	// Left Wall
 	    (ball.position.x > mWidth &&
 	     ball.velocity.x > 0.0f)) {	 // Right wall
-		mRunning = false;
+		return 1;		 // Stop game
 	}
+
+	return 0;
 }
 
-void Game::draw() {
+int Game::draw() {
 	// Clear background to blue
 	SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
 	SDL_RenderClear(mRenderer);
@@ -241,14 +236,18 @@ void Game::draw() {
 
 	// Swap front buffer and back buffer
 	SDL_RenderPresent(mRenderer);
+
+	return 0;
 }
 
-void Game::loop() {
-	while (mRunning) {
-		input();
-		update();
-		draw();
-	}
+int Game::loop() {
+	int uReturn = update();
+	if (uReturn != 0) return uReturn;
+
+	int dReturn = draw();
+	if (dReturn != 0) return dReturn;
+
+	return 0;  // TODO: Errors
 }
 
 bool Game::initialize() {

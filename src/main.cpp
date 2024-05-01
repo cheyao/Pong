@@ -1,31 +1,40 @@
 #include <SDL3/SDL.h>
+#define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
+
 #include <cstdlib>
 
 #include "game.hpp"
 
-int main(int argv, char** args) {
-        // Android needs argc and argv, but we don't use them, so...
-        (void)argv;
-        (void)args;
+int SDL_AppInit(void **appstate, int argc, char **argv) {
+	(void)appstate;
+	(void)argc;
+	(void)argv;
 
-        // Rand
-        srand(time(NULL));
+	srand(time(NULL));
 
-        // Start our game!
-        Game* game = new Game();
+	Game *game = new Game();
 
-        if (game->initialize()) {
-                // Failed to init
-                return 1;
-        }
+	if (game->initialize()) {
+		// Failed to init
+		return -1;
+	}
 
 	game->setBallCount(2);
 
-        game->loop();
+	*appstate = game;
 
-        game->close();
+	return 0;
+}
 
-        return 0;
+int SDL_AppEvent(void *appstate, const SDL_Event *event) {
+	return ((Game *)appstate)->handleEvent(*event);
+}
+
+int SDL_AppIterate(void *appstate) { return ((Game *)appstate)->loop(); }
+
+void SDL_AppQuit(void *appstate) {
+	((Game *)appstate)->close();
+	free((Game *)appstate);
 }
 
