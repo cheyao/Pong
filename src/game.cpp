@@ -5,13 +5,9 @@
 
 #include "game.hpp"
 
-#define THICKNESS 15
-#define PADDLE_HEIGHT 100
-
 Game::Game()
-    : mWindow(nullptr), mWidth(1024), mHeight(768), mBall({(float)mWidth / 2, (float)mHeight / 2}),
-      mBallVelocity({-200.0f, 235.0f}), mPaddle({50, (float)mHeight / 2 - 20}), mPaddleDir(0),
-      mRunning(true), mTicksCount(0), mMousePressed(false) {}
+    : mWindow(nullptr), mWidth(1024), mHeight(768), mBallVelocity({-200.0f, 235.0f}), mPaddleDir(0),
+      mRunning(true), mTicksCount(0), mMousePressed(false), THICKNESS(15), PADDLE_HEIGHT(100) {}
 
 void Game::input() {
         SDL_Event event;
@@ -44,7 +40,7 @@ void Game::input() {
                 }
 
                 default: {
-                        // Don't handle, wo don't need this event
+                        // Don't handle, we don't need this event
                 }
                 }
         }
@@ -64,23 +60,27 @@ void Game::input() {
                 mPaddleDir = 1;
         }
 
-	if (mMousePressed) {
-		// Mouse pressed, move there!
-		int mouseY;
-		SDL_GetMouseState(&mouseY, NULL);
+        if (mMousePressed) {
+                // Mouse pressed, move there!
+                int mouseY;
+                SDL_GetMouseState(NULL, &mouseY);
 
-		// Calculate difference
-		int diff = mouseY - mPaddle.y;
-		// Normalize
-		if (diff < 0) diff = -diff;
+                // Calculate difference
+                int diff = mouseY - mPaddle.y;
+                // Normalize
+                if (diff < 0)
+                        diff = -diff;
 
-		// Only process when the difference if big
-		if (diff > 10) {
-
-		}
-		
-		// Check if mouse below or above paddle
-	}
+                // Only process when the difference if big
+                if (diff > 10) {
+                        // Above or bellow
+                        if (mouseY < mPaddle.y) {
+                                mPaddleDir = -1; // Up
+                        } else {
+                                mPaddleDir = 1; // Down
+                        }
+                }
+        }
 }
 
 void Game::update() {
@@ -97,15 +97,14 @@ void Game::update() {
         // Update ticks count
         mTicksCount = SDL_GetTicks();
 
-
-	// Update Movements
+        // Update Movements
         if (mPaddleDir != 0) {
                 mPaddle.y += mPaddleDir * 300.0f * deltaTime;
         }
 
         // Make sure paddle doesn't move off screen
         if (mPaddle.y < (PADDLE_HEIGHT / 2.0f + THICKNESS)) {
-                mPaddle.y = PADDLE_HEIGHT / 2.0f + 100.0f;
+                mPaddle.y = PADDLE_HEIGHT / 2.0f + THICKNESS;
         } else if (mPaddle.y > (mHeight - PADDLE_HEIGHT / 2.0f - THICKNESS)) {
                 mPaddle.y = mHeight - PADDLE_HEIGHT / 2.0f - THICKNESS;
         }
@@ -130,6 +129,7 @@ void Game::update() {
                 mRunning = false;
         }
 
+        // Bounce
         if (mBall.y <= 15 && mBallVelocity.y < 0.0f) {
                 // Top wall
                 mBallVelocity.y *= -1;
@@ -209,6 +209,11 @@ bool Game::initialize() {
                 SDL_Log("Failed to create window: %s", SDL_GetError());
                 return 1;
         }
+
+        // Reset bonds, mostly for Android
+        SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
+        mBall = {(float)mWidth / 2, (float)mHeight / 2};
+        mPaddle = {50, (float)mHeight / 2 - (float)PADDLE_HEIGHT / 2};
 
         mRenderer = SDL_CreateRenderer(mWindow, -1,
                                        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);

@@ -24,6 +24,9 @@ class Game {
         Uint32 mTicksCount;
         bool mMousePressed;
 
+	int THICKNESS;
+	int PADDLE_HEIGHT;
+
         void input();
         void update();
         void draw();
