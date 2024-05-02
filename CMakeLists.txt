@@ -11,10 +11,12 @@ option(SANITIZE "Build with sanitizer support if available" OFF)
 option(VENDOR "Vendor libraries" OFF)
 # CMAKE_BUILD_TYPE Release Debug
 
-# Set buildname to main
 set(SRC
+# Sources
 src/main.cpp
 src/game.cpp
+# Headers
+include/game.hpp
 )
 
 # Check debug
