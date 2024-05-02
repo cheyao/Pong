@@ -86,17 +86,25 @@ if (ANDROID)
 	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3)
 elseif(MACOSX)
 	message("Building for MacOS")
+
 	include_directories(${SDL3_INCLUDE_DIRS})
-	add_executable(${BUILD_NAME} MACOSX_BUNDLE ${SRC})            
-	set_target_properties(${BUILD_NAME} PROPERTIES
-	    BUNDLE True
-	    MACOSX_BUNDLE_ICON_FILE ${CMAKE_SOURCE_DIR}/cmake/Pong.ico
-	    MACOSX_BUNDLE_GUI_IDENTIFIER org.cyao.${BUILD_NAME}
-	    MACOSX_BUNDLE_BUNDLE_NAME ${BUILD_NAME}
-	    MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
-	    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
-	    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/info.plist.in
-	)
+
+	if(DEBUG)
+		add_executable(${BUILD_NAME} ${SRC})
+		target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
+	else()
+		# Package into a application bundle
+		add_executable(${BUILD_NAME} MACOSX_BUNDLE ${SRC})            
+		set_target_properties(${BUILD_NAME} PROPERTIES
+		    BUNDLE True
+		    MACOSX_BUNDLE_ICON_FILE ${CMAKE_SOURCE_DIR}/cmake/${CMAKE_PROJECT_NAME}.ico
+		    MACOSX_BUNDLE_GUI_IDENTIFIER org.cyao.${BUILD_NAME}
+	   	    MACOSX_BUNDLE_BUNDLE_NAME ${BUILD_NAME}
+		    MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
+		    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+		    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/info.plist.in
+		)
+	endif()
 target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
 elseif(WINDOWS)
 	message("Building for windows")
