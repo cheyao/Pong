@@ -93,7 +93,6 @@ elseif(MACOSX)
 
 	if(DEBUG)
 		add_executable(${BUILD_NAME} ${SRC})
-		target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
 	else()
 		# Package into a application bundle
 		add_executable(${BUILD_NAME} MACOSX_BUNDLE ${SRC})            
@@ -107,7 +106,7 @@ elseif(MACOSX)
 		    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/info.plist.in
 		)
 	endif()
-target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
 elseif(WINDOWS)
 	message("Building for windows")
 	add_executable(${BUILD_NAME} WIN32 ${SRC})

@@ -4,7 +4,7 @@
 
 #include <SDL3/SDL.h>
 
-#include <vector>
+#include <list>
 
 typedef struct Vector2 {
 	float x;
@@ -22,7 +22,7 @@ class Game {
 	SDL_Renderer* mRenderer;
 	int mWidth;
 	int mHeight;
-	std::vector<Ball> mBalls;
+	std::list<Ball> mBalls;
 	Vector2 mPaddleA;
 	int mPaddleADir;
 	Vector2 mPaddleB;
@@ -47,9 +47,9 @@ class Game {
        public:
 	Game();
 	bool initialize();
-	void setBallCount(int count);
 	int loop();
 	int handleEvent(SDL_Event event);
+	void addBall(Ball *old = nullptr);
 	void close();
 };
 

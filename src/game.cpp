@@ -2,8 +2,11 @@
 
 #include <SDL3/SDL.h>
 
+#include <cmath>
 #include <cstdio>
 #include <vector>
+
+#include "SDL_scancode.h"
 
 Game::Game()
     : mWindow(nullptr),
@@ -72,6 +75,12 @@ int Game::handleEvent(SDL_Event event) {
 		case SDL_EVENT_QUIT:
 			// Quitting the app
 			return 1;
+
+		case SDL_EVENT_KEY_DOWN:
+			if (event.key.keysym.sym == SDLK_ESCAPE) {
+				return 1;
+			}
+			break;
 
 		case SDL_EVENT_WINDOW_RESIZED:
 			// Window was resized
@@ -144,7 +153,10 @@ int Game::update() {
 	// Update balls
 	for (Ball& b : mBalls) {
 		int uReturn = updateBall(b, delta);
-		if (uReturn != 0) return uReturn;
+		if (uReturn == 1) {
+			addBall(&b);
+			addBall();
+		}
 	}
 
 	// Make sure paddle doesn't move off screen
@@ -198,7 +210,7 @@ int Game::updateBall(Ball& ball, float delta) {
 	if ((ball.position.x < 0 && ball.velocity.x < 0.0f) ||	// Left Wall
 	    (ball.position.x > mWidth &&
 	     ball.velocity.x > 0.0f)) {	 // Right wall
-		return 1;		 // Stop game
+		return 1;
 	}
 
 	return 0;
@@ -287,13 +299,24 @@ bool Game::initialize() {
 	return 0;  // Succesfully initialized!
 }
 
-void Game::setBallCount(int count) {
-	for (int i = 0; i < count; i++) {
-		mBalls.push_back(
-		    {{(float)mWidth / 2, (float)mHeight / 2},
-		     {static_cast<float>(rand() % 100) - 50,
-		      static_cast<float>(rand() % mHeight - 800) + 400}});
+void Game::addBall(Ball* old) {
+	int angle = rand() % 110 - 60 * (rand() % 2 ? 1 : -1);	// 0 - x = 100%
+	float x = std::cos(angle);
+	float y = std::sin(angle);
+
+	if (old != nullptr) {
+		old->position = {static_cast<float>(mWidth) / 2,
+				   static_cast<float>(rand() % (mHeight - 20) +
+						      10)};
+		old->velocity = {x * 250, y * 250};
+	} else {
+		mBalls.push_back({{static_cast<float>(mWidth) / 2,
+				   static_cast<float>(rand() % (mHeight - 20) +
+						      10)},  // Random hight
+				  {x * 250, y * 250}});
 	}
+
+	SDL_Log("Ball count: %zd", mBalls.size());
 }
 
 void Game::close() {

@@ -1,6 +1,6 @@
-#include <cstdlib>
-
 #include <SDL3/SDL.h>
+
+#include <cstdlib>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
@@ -20,7 +20,7 @@ int SDL_AppInit(void **appstate, int argc, char **argv) {
 		return -1;
 	}
 
-	game->setBallCount(2);
+	game->addBall();
 
 	*appstate = game;
 
