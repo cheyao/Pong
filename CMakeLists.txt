@@ -59,8 +59,13 @@ if(SANITIZE STREQUAL ON)
 endif()
 
 # Optimization flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+if(WINDOWS)
+	set(CMAKE_CXX_FLAGS_DEBUG "/MDd /Zi /Ob0 /Od /RTC1 /DWIN32 /D_WINDOWS /W3 /GR /EHsc /D_DEBUG")
+	set(CMAKE_CXX_FLAGS_RELEASE "/MD /O2 /Ob2 /DNDEBUG /DWIN32 /D_WINDOWS")
+else()
+	set(CMAKE_CXX_FLAGS_DEBUG "-g")
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif()
 
 # Check LTO
 include(CheckIPOSupported)
