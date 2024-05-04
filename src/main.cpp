@@ -35,6 +35,6 @@ int SDL_AppIterate(void *appstate) { return ((Game *)appstate)->loop(); }
 
 void SDL_AppQuit(void *appstate) {
 	((Game *)appstate)->close();
-	free((Game *)appstate);
+	delete((Game *)appstate);
 }
 
