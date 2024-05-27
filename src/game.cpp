@@ -6,8 +6,6 @@
 #include <cstdio>
 #include <vector>
 
-#include "SDL_scancode.h"
-
 Game::Game()
     : mWindow(nullptr),
       mWidth(1024),

@@ -27,3 +27,7 @@ git submodule update --init --recursive
 cd android-wrapper 
 ./gradlew installRelease
 ```
+
+## Building for windows
+You gotta figure it out yourself, but it works (I cross compiled it from linux).
+
