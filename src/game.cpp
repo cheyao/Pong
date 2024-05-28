@@ -287,7 +287,7 @@ bool Game::initialize() {
 		    (float)mHeight / 2 - (float)PADDLE_HEIGHT / 2};
 
 	mRenderer =
-	    SDL_CreateRenderer(mWindow, NULL, SDL_RENDERER_PRESENTVSYNC);
+	    SDL_CreateRenderer(mWindow, NULL);
 	if (mRenderer == NULL) {
 		SDL_Log("Failed to create renderer: %s", SDL_GetError());
 	}
